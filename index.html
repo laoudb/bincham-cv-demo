@@ -263,7 +263,8 @@
     var ry = idx * 42;                            /* angles de départ décalés */
     var SPIN = 0.32, FRICT = 0.955;               /* vitesse auto / décroissance de l'élan */
     var dragging = false, lastX = 0, vy = 0, fly = false;
-    function draw(){ card.style.transform = 'rotateY(' + ry.toFixed(2) + 'deg)'; }
+    /* perspective en FONCTION (pas en propriété) = épaisseur 3D visible ET zéro bug au zoom natif */
+    function draw(){ card.style.transform = 'perspective(900px) rotateY(' + ry.toFixed(2) + 'deg)'; }
     function loop(){
       if(!dragging){
         if(fly){ ry += vy; vy *= FRICT; if(Math.abs(vy) < SPIN){ fly = false; } }
