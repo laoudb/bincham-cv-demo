@@ -248,4 +248,52 @@
   tick(); setInterval(tick,1000);
 })();
 </script>
+
+<script>
+/* Cartes MANIPULABLES au doigt (mobile) ET à la souris (PC) — rotation ORTHOGRAPHIQUE
+   (aucune perspective → zéro bug au zoom). Auto-spin par défaut ; on peut les attraper,
+   les faire tourner, et les lâcher avec de l'élan. */
+(function(){
+  var stages = document.querySelectorAll('.stage');
+  Array.prototype.forEach.call(stages, function(stage, idx){
+    var card = stage.querySelector('.card');
+    if(!card) return;
+    card.style.animation = 'none';               /* coupe le spin CSS */
+    card.style.willChange = 'transform';
+    var ry = idx * 42;                            /* angles de départ décalés */
+    var SPIN = 0.32, FRICT = 0.955;               /* vitesse auto / décroissance de l'élan */
+    var dragging = false, lastX = 0, vy = 0, fly = false;
+    function draw(){ card.style.transform = 'rotateY(' + ry.toFixed(2) + 'deg)'; }
+    function loop(){
+      if(!dragging){
+        if(fly){ ry += vy; vy *= FRICT; if(Math.abs(vy) < SPIN){ fly = false; } }
+        else { ry += SPIN; }
+        draw();
+      }
+      requestAnimationFrame(loop);
+    }
+    stage.style.touchAction = 'none';
+    stage.style.cursor = 'grab';
+    stage.addEventListener('pointerdown', function(e){
+      dragging = true; fly = false; lastX = e.clientX; vy = 0;
+      stage.style.cursor = 'grabbing';
+      try { stage.setPointerCapture(e.pointerId); } catch(_){}
+    });
+    stage.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var dx = e.clientX - lastX; lastX = e.clientX;
+      ry += dx * 0.6; vy = dx * 0.6; draw();
+    });
+    function release(){
+      if(!dragging) return;
+      dragging = false; stage.style.cursor = 'grab';
+      if(Math.abs(vy) > 0.6){ fly = true; }
+    }
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+    draw();
+    requestAnimationFrame(loop);
+  });
+})();
+</script>
 </body></html>
